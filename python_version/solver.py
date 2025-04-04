@@ -158,32 +158,34 @@ class Solver:
         return max_x, max_y
 
     def churn(self):
-        place_x, place_y = self.coord_with_least_fits()
-        if True or self.every_piece_fits():
-            u = None
-            d = None
-            l = None
-            r = None
-            if place_x > 0 and self.main_board.board[place_x - 1][place_y] is not None:
-                l = self.main_board.board[place_x - 1][place_y].right
-            if place_x < self.main_board.width - 1 and self.main_board.board[place_x + 1][place_y] is not None:
-                r = self.main_board.board[place_x + 1][place_y].left
-            if place_y > 0 and self.main_board.board[place_x][place_y - 1] is not None:
-                u = self.main_board.board[place_x][place_y - 1].down
-            if place_y < self.main_board.height - 1 and self.main_board.board[place_x][place_y + 1] is not None:
-                d = self.main_board.board[place_x][place_y + 1].up
+        while True:
+            place_x, place_y = self.coord_with_least_fits()
+            if True or self.every_piece_fits():
+                u = None
+                d = None
+                l = None
+                r = None
+                if place_x > 0 and self.main_board.board[place_x - 1][place_y] is not None:
+                    l = self.main_board.board[place_x - 1][place_y].right
+                if place_x < self.main_board.width - 1 and self.main_board.board[place_x + 1][place_y] is not None:
+                    r = self.main_board.board[place_x + 1][place_y].left
+                if place_y > 0 and self.main_board.board[place_x][place_y - 1] is not None:
+                    u = self.main_board.board[place_x][place_y - 1].down
+                if place_y < self.main_board.height - 1 and self.main_board.board[place_x][place_y + 1] is not None:
+                    d = self.main_board.board[place_x][place_y + 1].up
 
-            next_tiles = self.pick_with_constraints(u, d, l, r)
-            for tile in next_tiles:
-                new_tiles = copy(self.tiles)
-                nextState = SolverState(deepcopy(self.main_board), new_tiles)
-                nextState.board.place_tile(place_x, place_y, tile)
-                new_tiles.remove(tile)
-                self.queue.append(nextState)
+                next_tiles = self.pick_with_constraints(u, d, l, r)
+                for tile in next_tiles:
+                    new_tiles = copy(self.tiles)
+                    nextState = SolverState(deepcopy(self.main_board), new_tiles)
+                    nextState.board.place_tile(place_x, place_y, tile)
+                    new_tiles.remove(tile)
+                    self.queue.append(nextState)
 
-        print(len(self.queue))
+            print(len(self.queue))
 
-        if len(self.queue) != 0:
-            board = self.queue.pop(0)
-            self.main_board = board.board
-            self.tiles = board.tiles_left  
+            if len(self.queue) > 0:
+                board = self.queue.pop(0)
+                self.main_board = board.board
+                self.tiles = board.tiles_left
+            break

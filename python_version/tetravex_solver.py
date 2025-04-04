@@ -9,7 +9,7 @@ screen = pygame.display.set_mode((640, 480))
 clock = pygame.time.Clock()
 running = True
 
-sz = 8
+sz = 6
 
 board = Board(size=sz)
 pieces_board = Board(320, 32, size=sz)

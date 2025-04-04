@@ -16,7 +16,7 @@ class Board:
 
     board: List[List[Optional[Tile]]]
 
-    tile_size: int = 32
+    tile_size: int = 14
 
     show_empty = False
 
@@ -49,9 +49,41 @@ class Board:
                 else:
                     tile.up = self.board[x][y - 1].down
                 tile.down = COLOR_BANK[randint(0, len(COLOR_BANK) - 1)]
-        
         self.shuffle()
-                
+
+    def generate_partial(self):
+        self.board = []
+        for _ in range(self.width):
+            xx: List[Tile] = []
+            for __ in range(self.height):
+                xx.append(Tile(blank=True))
+            self.board.append(xx)
+        
+        for x in range(self.width):
+            for y in range(self.height):
+                tile = self.board[x][y]
+                if tile.is_blank():
+                    if x == 0:
+                        tile.left = COLOR_BANK[randint(0, len(COLOR_BANK) - 1)]
+                    else:
+                        tile.left = self.board[x - 1][y].right
+                    tile.right = COLOR_BANK[randint(0, len(COLOR_BANK) - 1)]
+
+                    if y == 0:
+                        tile.up = COLOR_BANK[randint(0, len(COLOR_BANK) - 1)]
+                    else:
+                        tile.up = self.board[x][y - 1].down
+                    tile.down = COLOR_BANK[randint(0, len(COLOR_BANK) - 1)]
+
+    def tile_in_puzzle(self, tile):
+        for x in range(self.width):
+            for y in range(self.height):
+                if self.board[x][y].equivalent(tile):
+                    return True
+        return False
+
+    def remove_tile(self, x, y):
+        self.board[x][y].blank()
 
     def generate_empty(self):
         self.board = []
@@ -84,13 +116,13 @@ class Board:
     def render(self, surface):
         for x in range(self.width):
             for y in range(self.height):
+                if self.board[x][y] is not None:
+                    self.board[x][y].draw(surface, self.offset_x + x * self.tile_size, self.offset_y + y * self.tile_size, self.tile_size)
                 pygame.draw.rect(surface, 
-                                 (128, 128, 128),
+                                 (0, 0, 0),
                                  pygame.Rect(self.offset_x + x * self.tile_size, self.offset_y + y * self.tile_size, self.tile_size, self.tile_size),
                                  width=1
                             )
-                if self.board[x][y] is not None:
-                    self.board[x][y].draw(surface, self.offset_x + x * self.tile_size, self.offset_y + y * self.tile_size, self.tile_size)
         if self.show_empty:
             self.render_empty(surface)
 
@@ -199,4 +231,37 @@ class Board:
                     if self.board[x][y - 1].down != self.board[x][y].up:
                         return False
         return True
+    
+    def __eq__(self, other):
+        for x in range(self.width):
+            for y in range(self.height):
+                if self.board[x][y] is None and other.board[x][y] is not None:
+                    return False
+                elif self.board[x][y] is not None and other.board[x][y] is None:
+                    return False
+                elif self.board[x][y] is None and other.board[x][y] is None:
+                    continue
+                else:
+                    if self.board[x][y].left != other.board[x][y].left:
+                        return False
+                    if self.board[x][y].right != other.board[x][y].right:
+                        return False
+                    if self.board[x][y].up != other.board[x][y].up:
+                        return False
+                    if self.board[x][y].down != other.board[x][y].down:
+                        return False
+        return True
+    
+    def string_to_tiles(self, str):
+        chunks = [str[i:i+4] for i in range(0, len(str), 4)]
+        index = 0
+        for tile in chunks:
+            t = Tile()
+            t.up = COLOR_BANK[ord(tile[0]) - ord('A')]
+            t.right = COLOR_BANK[ord(tile[1]) - ord('A')]
+            t.down = COLOR_BANK[ord(tile[2]) - ord('A')]
+            t.left = COLOR_BANK[ord(tile[3]) - ord('A')]
+            self.place_tile(index % self.width, index // self.width, t)
+
+            index += 1
 

@@ -1,0 +1,33 @@
+# Compiler
+CXX = g++
+
+# Compiler flags
+CXXFLAGS = -fopenmp -Wall -g
+
+# Target executable
+TARGET = tetra_shared
+
+# For deleting the target
+TARGET_DEL = tetra_shared
+
+# Source files
+SRCS = tetravex_parallel_norot_shared.cpp BoardClassic.cpp SharedFunctions.cpp
+
+# Object files
+OBJS = $(SRCS:.cpp=.o)
+
+# Default rule to build and run the executable
+all: $(TARGET)
+
+# Rule to link object files into the target executable
+$(TARGET): $(OBJS)
+	$(CXX) $(CXXFLAGS) -o $(TARGET) $(OBJS)
+
+# Rule to compile .cpp files into .o files
+%.o: %.cpp
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+
+# Clean rule to remove generated files
+clean:
+	rm $(TARGET_DEL) $(OBJS)
